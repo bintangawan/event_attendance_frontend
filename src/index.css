@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+:root {
+  font-family: "Poppins", sans-serif;
+  background-color: #09090b; /* Zinc 950 */
+  color: #fafafa;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  /* Hapus display flex/place-items agar tidak konflik dengan layout komponen */
+}
+
+/* Smooth transition untuk semua interaksi */
+* {
+  transition: all 0.2s ease-in-out;
+}
