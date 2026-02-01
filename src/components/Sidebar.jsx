@@ -6,6 +6,7 @@ import {
   HiOutlineCalendar,
   HiOutlineUsers,
   HiOutlineTicket,
+  HiOutlinePhotograph, // Icon Baru
   HiMenuAlt2,
   HiX,
   HiChevronLeft,
@@ -38,6 +39,11 @@ export default function Sidebar() {
     const eventId = eventIdMatch[1];
     menuItems.push(
       {
+        name: "Details & Gallery", // MENU BARU
+        path: `/admin/events/${eventId}/details`,
+        icon: <HiOutlinePhotograph size={22} />,
+      },
+      {
         name: "Attendance",
         path: `/admin/events/${eventId}/attendance`,
         icon: <HiOutlineUsers size={22} />,
@@ -51,7 +57,7 @@ export default function Sidebar() {
         name: "Winners",
         path: `/admin/events/${eventId}/lottery`,
         icon: <HiOutlineTicket size={22} />,
-      },
+      }
     );
   }
 

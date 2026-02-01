@@ -498,7 +498,7 @@ export default function CheckinPage() {
                     margin: "1rem 0 0 0",
                   }}
                 >
-                  Authorized QR Code
+                  Event System Ticket
                 </p>
               </div>
             </div>

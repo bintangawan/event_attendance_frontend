@@ -9,6 +9,8 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AdminAttendance from "./pages/AdminAttendance.jsx";
 import AdminLottery from "./pages/AdminLottery.jsx";
 import LotteryRoulette from "./pages/LotteryRoulette.jsx";
+import AdminDetailEvents from "./pages/AdminDetailEvents.jsx";
+import TicketValidatorPage from "./pages/TicketValidatorPage.jsx";
 
 export default function App() {
   return (
@@ -18,6 +20,7 @@ export default function App() {
         <Route path="/" element={<ScanPage />} />
         <Route path="/checkin/:eventCode" element={<CheckinPage />} />
         <Route path="/ticket/:token" element={<TicketPage />} />
+        <Route path="/validator" element={<TicketValidatorPage />} />
         {/* Admin */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route
@@ -25,6 +28,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <AdminEvents />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/events/:id/details"
+          element={
+            <ProtectedRoute>
+              <AdminDetailEvents />
             </ProtectedRoute>
           }
         />

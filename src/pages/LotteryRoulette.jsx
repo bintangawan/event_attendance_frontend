@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import confetti from "canvas-confetti";
 import api from "../api/api.js";
 import Sidebar from "../components/Sidebar.jsx";
 import "../styles/roulette.css";
@@ -19,24 +20,9 @@ export default function LotteryRoulette() {
   const [hadiahInput, setHadiahInput] = useState("");
 
   const colors = [
-    "#F44336",
-    "#E91E63",
-    "#9C27B0",
-    "#673AB7",
-    "#3F51B5",
-    "#2196F3",
-    "#03A9F4",
-    "#00BCD4",
-    "#009688",
-    "#4CAF50",
-    "#8BC34A",
-    "#CDDC39",
-    "#FFEB3B",
-    "#FFC107",
-    "#FF9800",
-    "#FF5722",
-    "#795548",
-    "#9E9E9E",
+    "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3",
+    "#03A9F4", "#00BCD4", "#009688", "#4CAF50", "#8BC34A", "#CDDC39",
+    "#FFEB3B", "#FFC107", "#FF9800", "#FF5722", "#795548", "#9E9E9E",
   ];
 
   const fetchParticipants = useCallback(async () => {
@@ -58,8 +44,24 @@ export default function LotteryRoulette() {
     fetchParticipants();
   }, [fetchParticipants]);
 
+  // FUNGSI: Efek petasan
+  const triggerFireworks = () => {
+    const duration = 3 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+    const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+    const interval = setInterval(function () {
+      const timeLeft = animationEnd - Date.now();
+      if (timeLeft <= 0) return clearInterval(interval);
+
+      const particleCount = 50 * (timeLeft / duration);
+      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+    }, 250);
+  };
+
   const spinWheel = async () => {
-    // Validasi input hadiah
     if (!hadiahInput.trim()) {
       toast.error("Silakan masukkan jenis hadiah terlebih dahulu!");
       return;
@@ -72,7 +74,7 @@ export default function LotteryRoulette() {
     try {
       const res = await api.post(`/api/lottery/${id}`, {
         jumlah_pemenang: 1,
-        hadiah: hadiahInput, // Mengirimkan hadiah dari input
+        hadiah: hadiahInput,
       });
 
       const winnerData = res.data.winners[0];
@@ -88,7 +90,7 @@ export default function LotteryRoulette() {
 
       const numSegments = participants.length;
       const degreesPerSegment = 360 / numSegments;
-      const extraRotations = 10 * 360;
+      const extraRotations = 20 * 360; // 20 putaran
       const targetOffset =
         360 - (winnerIndex * degreesPerSegment + degreesPerSegment / 2);
       const newRotation =
@@ -97,15 +99,18 @@ export default function LotteryRoulette() {
       setRotation(newRotation);
 
       setTimeout(() => {
+        // UPDATE: Menyimpan alamat ke state finalWinner
         setFinalWinner({
           nama: winnerData.nama,
           token: winnerData.ticket_token,
           hadiah: winnerData.hadiah,
+          alamat: winnerData.alamat, // <-- Menambahkan data alamat
         });
         setSpinning(false);
-        setHadiahInput(""); // Reset input hadiah setelah menang
+        setHadiahInput("");
         fetchParticipants();
-      }, 5000);
+        triggerFireworks();
+      }, 10000); 
     } catch (err) {
       console.error("Spin Error:", err);
       toast.error("Gagal melakukan pengundian.");
@@ -130,7 +135,7 @@ export default function LotteryRoulette() {
 
         {/* MAIN AREA */}
         <div className="flex-1 flex items-center justify-center relative px-20">
-          {/* ROULETTE (TENGAH) */}
+          {/* ROULETTE */}
           <div className="relative flex items-center justify-center">
             <div className="wheel-glow-center"></div>
             <div className="wheel-container-main">
@@ -138,7 +143,12 @@ export default function LotteryRoulette() {
               <div className="wheel-center-cap"></div>
               <div
                 className="wheel"
-                style={{ transform: `rotate(${rotation}deg)` }}
+                style={{ 
+                  transform: `rotate(${rotation}deg)`,
+                  transition: spinning 
+                    ? "transform 10s cubic-bezier(0.1, 0, 0.2, 1)" 
+                    : "none" 
+                }}
               >
                 {participants.map((p, index) => {
                   const degreesPerSegment = 360 / participants.length;
@@ -166,9 +176,8 @@ export default function LotteryRoulette() {
             </div>
           </div>
 
-          {/* PANEL KONTROL (KANAN TENGAH) */}
+          {/* PANEL KONTROL */}
           <div className="absolute right-12 top-1/2 -translate-y-1/2 flex flex-col gap-4 w-72 z-20">
-            {/* Box Status */}
             <div className="bg-white/50 border border-zinc-200 p-5 rounded-3xl backdrop-blur-md shadow-sm">
               <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">
                 Peserta Ready
@@ -178,7 +187,6 @@ export default function LotteryRoulette() {
               </p>
             </div>
 
-            {/* Input Jenis Hadiah */}
             <div className="bg-white border border-zinc-200 p-5 rounded-3xl shadow-sm">
               <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 block">
                 Jenis Hadiah
@@ -203,7 +211,7 @@ export default function LotteryRoulette() {
           </div>
         </div>
 
-        {/* MODAL PEMENANG */}
+        {/* MODAL PEMENANG (CARD) */}
         <div
           className={`overlay-blur ${finalWinner ? "active" : ""}`}
           onClick={() => setFinalWinner(null)}
@@ -213,17 +221,33 @@ export default function LotteryRoulette() {
           <h2 className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] text-center">
             Selamat Kepada
           </h2>
+          
           <div className="text-3xl font-black text-zinc-900 mt-2 mb-1 text-center">
             {finalWinner?.nama}
           </div>
-          <div className="flex justify-center flex-col items-center">
-            <div className="px-3 py-1 bg-zinc-100 rounded-lg font-mono text-zinc-500 font-bold mb-2 border border-zinc-200 uppercase tracking-tighter">
+
+          <div className="flex justify-center flex-col items-center w-full">
+            {/* Token */}
+            <div className="px-3 py-1 bg-zinc-100 rounded-lg font-mono text-zinc-500 font-bold mb-4 border border-zinc-200 uppercase tracking-tighter">
               {finalWinner?.token}
             </div>
-            <div className="text-sm font-bold text-amber-600 uppercase tracking-widest mb-6">
-              Mendapatkan: {finalWinner?.hadiah}
+
+            {/* UPDATE: Menampilkan Alamat */}
+            <div className="mb-6 text-center w-full px-8">
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">
+                Alamat
+              </p>
+              <p className="text-sm font-medium text-zinc-600 leading-tight">
+                {finalWinner?.alamat || "-"}
+              </p>
+            </div>
+
+            <div className="text-sm font-bold text-amber-600 uppercase tracking-widest mb-6 border-t border-zinc-100 pt-4 w-full text-center">
+              Mendapatkan: <br/>
+              <span className="text-xl text-zinc-900">{finalWinner?.hadiah}</span>
             </div>
           </div>
+
           <button
             onClick={() => setFinalWinner(null)}
             className="w-full py-4 bg-zinc-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest transition-colors hover:bg-zinc-800"
