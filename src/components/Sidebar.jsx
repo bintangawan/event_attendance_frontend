@@ -6,16 +6,18 @@ import {
   HiOutlineCalendar,
   HiOutlineUsers,
   HiOutlineTicket,
-  HiOutlinePhotograph, // Icon Baru
+  HiOutlinePhotograph,
+  HiOutlineUserAdd, // <--- IMPORT ICON BARU
   HiMenuAlt2,
   HiX,
   HiChevronLeft,
   HiChevronRight,
+  HiLightningBolt,
 } from "react-icons/hi";
 
 export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false); // Untuk mobile
-  const [isCollapsed, setIsCollapsed] = useState(false); // Untuk desktop collapse
+  const [isOpen, setIsOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,14 +41,24 @@ export default function Sidebar() {
     const eventId = eventIdMatch[1];
     menuItems.push(
       {
-        name: "Details & Gallery", // MENU BARU
+        name: "Details & Gallery",
         path: `/admin/events/${eventId}/details`,
         icon: <HiOutlinePhotograph size={22} />,
       },
       {
-        name: "Attendance",
+        name: "Add Participant", // <--- MENU BARU
+        path: `/admin/events/${eventId}/add-attendance`,
+        icon: <HiOutlineUserAdd size={22} />,
+      },
+      {
+        name: "Attendance List",
         path: `/admin/events/${eventId}/attendance`,
         icon: <HiOutlineUsers size={22} />,
+      },
+      {
+        name: "Scan Consumption",
+        path: `/admin/events/${eventId}/scan-consumption`,
+        icon: <HiLightningBolt size={22} />,
       },
       {
         name: "Roulette",
